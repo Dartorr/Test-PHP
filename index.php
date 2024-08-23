@@ -20,38 +20,43 @@ while ($xml->read()) {//перебираем до конца потока
 
     if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'offer') {//если натыкаемся на предложение
         while ($xml->read())//начинаем его читать
+        {
             if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'category') {//если натыкаемся на категорию (комната, дом, квартира)
                 $xml->read();//считываем
-                if ($xml->value == "flat") //если квартира
-                    if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'locality-name') {//если натыкаемся на название города -- 
-                        $xml->read();//считываем
-                        if ($xml->value == "Ярославль") { //если ярославль -- 
-                            $flatsYar++;//просто увеличиваем счетчик
-                        } elseif ($xml->value == "Москва") {//если москва...
-                            while ($xml->read())
-                                if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'description') {//ищем описание
-                                    $xml->read();
+                if ($xml->value == "flat") {//если квартира
+                    while ($xml->read())//читаем ее
+                        if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'locality-name') {//если натыкаемся на название города -- 
+                            $xml->read();//считываем
+                            if ($xml->value == "Ярославль") { //если ярославль -- 
+                                $flatsYar++;//просто увеличиваем счетчик
+                            } elseif ($xml->value == "Москва") {//если москва...
+                                while ($xml->read())
+                                    if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'description') {//ищем описание
+                                        $xml->read();
 
-                                    $descr = $xml->value;
-                                    if (preg_match($regex, $descr)) {//ищем в описании по регулярному выражению, что с животными можно
-                                        $flatsMoscow++;//если находим -- увеличиваем счетчик
+                                        $descr = $xml->value;
+                                        if (preg_match($regex, $descr)) {//ищем в описании по регулярному выражению, что с животными можно
+                                            $flatsMoscow++;//если находим -- увеличиваем счетчик
+                                        }
+
+                                        break; //заканчиваем поиск описания
                                     }
-
-                                    break;
-                                }
-                            break;
-                        } elseif ($xml->value == "Минск") { //если минск...
-                            while ($xml->read())
-                                if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'value') {//находим цену
-                                    $xml->read();
-                                    $infoMinsk[$minsk] = $xml->value;//записываем массив
-                                    $minsk++;//увеличиваем счетчик
-                                    break;
-                                }
-                            break;
+                                break; //переходим к следующему предложению
+                            } elseif ($xml->value == "Минск") { //если минск...
+                                while ($xml->read())
+                                    if ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'value') {//находим цену
+                                        $xml->read();
+                                        $infoMinsk[$minsk] = $xml->value;//записываем массив
+                                        $minsk++;//увеличиваем счетчик
+                                        break;//заканчиваем поиск цены
+                                    }
+                                break;//переходим к следующему предложению
+                            }
                         }
-                    }
+                        elseif ($xml->nodeType == XMLReader::ELEMENT && $xml->localName == 'param') break; //если при чтении натыкаемся на тег param -- значит, мы прочитали наше предложение и должны перейти к следующему
+                }
             }
+        }
     }
 }
 
